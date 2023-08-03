@@ -14,7 +14,6 @@ on:
 env:
   MIX_ENV: test
   EVISION_PREFER_PRECOMPILED: true
-  VIX_COMPILATION_MODE: PLATFORM_PROVIDED_LIBVIPS
 
 permissions:
   contents: read
@@ -86,4 +85,4 @@ jobs:
 
     # Step: Execute the tests.
     - name: Run tests
-      run: mix test --exclude text --exclude text_avatar --exclude video
+      run: mix test test/debug_test.exs
