@@ -21,21 +21,6 @@ permissions:
 
 jobs:
   test:
-    # Set up a Postgres DB service. By default, Phoenix applications
-    # use Postgres. This creates a database for running tests.
-    # Additional services can be defined here if required.
-    # services:
-    #   db:
-    #     image: postgres:12
-    #     ports: ['5432:5432']
-    #     env:
-    #       POSTGRES_PASSWORD: postgres
-    #     options: >-
-    #       --health-cmd pg_isready
-    #       --health-interval 10s
-    #       --health-timeout 5s
-    #       --health-retries 5
-
     runs-on: ubuntu-latest
     name: Test on OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
     strategy:
@@ -83,38 +68,6 @@ jobs:
           ${{ runner.os }}-mix-${{ env.cache-name }}-
           ${{ runner.os }}-mix-
 
-    # Step: Install the dependencies for libvips
-    - name: Install libvips build dependencies
-      run: sudo apt-get install build-essential libxml2-dev libfftw3-dev libmagickwand-dev libopenexr-dev liborc-0.4-0 gobject-introspection libgsf-1-dev libglib2.0-dev liborc-0.4-dev libpango1.0-dev libpangocairo-1.0-0 libpangoft2-1.0-0 curl
-
-    # Install latest libvips
-    - name: Get latest version of libvips
-      run: |
-        VIPS_LATEST_RELEASE="https://github.com/libvips/libvips/releases/download/v8.13.0/vips-8.13.0.tar.gz"
-        echo "VIPS_LATEST_RELEASE=${VIPS_LATEST_RELEASE}" >> $GITHUB_ENV
-
-    - name: Cache libvips artifacts
-      uses: actions/cache@v3
-      id: vips-cache
-      with:
-        path: vips
-        key: ${{ runner.os }}-vips-${{ env.VIPS_LATEST_RELEASE }}
-
-    - name: Compile libvips from source
-      if: steps.vips-cache.outputs.cache-hit != 'true'
-      run: |
-        mkdir vips
-        curl -s -L "${VIPS_LATEST_RELEASE}" | tar xz -C ./vips --strip-components=1
-        cd vips
-        ./configure
-        make
-
-    - name: Install libvips
-      run: |
-        cd vips
-        sudo make install
-        sudo ldconfig -v
-
     # Step: Download project dependencies. If unchanged, uses
     # the cached version.
     - name: Install dependencies
@@ -134,7 +87,3 @@ jobs:
     # Step: Execute the tests.
     - name: Run tests
       run: mix test --exclude text --exclude text_avatar --exclude video
-
-    # Step: Execute dialyzer.
-    - name: Run dialyzer
-      run: mix dialyzer
